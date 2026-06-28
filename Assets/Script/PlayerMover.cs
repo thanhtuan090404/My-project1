@@ -2,9 +2,17 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 public class PlayerMover : MonoBehaviour
 {
-    private float speedMove = 5f;
-    private float jumpForce = 135f;
+   [SerializeField] private float speedMove = 5f;
+   [SerializeField] private float jumpForce = 5f;
 
+    private float _h, _v;
+    private Rigidbody _rb;
+    private bool _jumpRequest;
+
+    void Awake()
+    {
+        _rb = GetComponent<Rigidbody>();
+    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -32,18 +40,25 @@ public class PlayerMover : MonoBehaviour
         //    transform.Translate(Vector3.right * Time.deltaTime * speedMove);
         //}
 
-       float h = Input.GetAxis("Horizontal");
-       float v = Input.GetAxis("Vertical");
-
-        Vector3 movement = new Vector3(h, 0, v);
-
-        transform.Translate(movement * Time.deltaTime * speedMove);
+        _h = Input.GetAxis("Horizontal");
+        _v = Input.GetAxis("Vertical");
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            transform.Translate(Vector3.up*Time.deltaTime * jumpForce);
+            _jumpRequest = true; // ghi nhân yêu cầu nhảy xử lý ở fixedUpdate
         }
 
+    }
+    void FixedUpdate()
+    {
+        Vector3 move = new Vector3(_h, 0, _v);
+        _rb.MovePosition(_rb.position + move * speedMove * Time.fixedDeltaTime);
+
+        if (_jumpRequest)
+        {
+            _rb.AddForce(Vector3.up*jumpForce, ForceMode.Impulse);
+            _jumpRequest = false;
+        }
     }
     
 }
